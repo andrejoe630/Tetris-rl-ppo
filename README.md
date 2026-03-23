@@ -3,6 +3,7 @@
 RL agents for Tetris using `tetris_gymnasium`, trained with **DQN + macro (placement) actions**.
 
 Each "timestep" = 1 placed piece: the agent picks `(rotation, x, hold?)`, the wrapper teleports the piece and hard-drops it.
+
 ![Bot playing](assets/tetris_bot.gif)
 
 ## Setup (Windows)
