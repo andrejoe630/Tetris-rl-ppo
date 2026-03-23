@@ -1,4 +1,4 @@
-# Tetris-rl-ppo
+# Tetris-rl-dqn
 
 RL agents for Tetris using `tetris_gymnasium`, trained with **DQN + macro (placement) actions**.
 
@@ -40,12 +40,12 @@ python .\dqn\train_dqn_server.py --timesteps 2000000 --resume-from .\models\<che
 
 ## Train on server (headless)
 ```powershell
-ssh root@65.109.128.235 "cd /root/tetris-rl-ppo; OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 nohup python train_dqn_server.py --timesteps 2000000 --obs board --hold-actions --next-n 5 --reward-profile tetris > dqn_train.log 2>&1 &"
+ssh root@65.109.128.235 "cd /root/tetris-rl-dqn; OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 nohup python train_dqn_server.py --timesteps 2000000 --obs board --hold-actions --next-n 5 --reward-profile tetris > dqn_train.log 2>&1 &"
 ```
 
 Monitor:
 ```powershell
-ssh root@65.109.128.235 "tail -40 /root/tetris-rl-ppo/dqn_train.log"
+ssh root@65.109.128.235 "tail -40 /root/tetris-rl-dqn/dqn_train.log"
 ```
 
 ## Watch the agent play locally
@@ -89,7 +89,7 @@ python .\dqn\eval_lines.py --obs board --hold-actions --next-n 1 --reward-profil
 ```powershell
 ssh -L 16006:localhost:6006 root@65.109.128.235
 # On the server:
-tensorboard --logdir /root/tetris-rl-ppo/logs --port 6006 --host 127.0.0.1
+tensorboard --logdir /root/tetris-rl-dqn/logs --port 6006 --host 127.0.0.1
 ```
 Then open: http://localhost:16006
 
