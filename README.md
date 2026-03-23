@@ -65,6 +65,11 @@ python .\record_gif.py --model-path .\models\<checkpoint>.zip --episodes 3 --max
 ```
 Auto-detects obs/hold/next-n/reward from the checkpoint filename unless you override them.
 
+Loop forever and keep only the best episode (by lines cleared):
+```powershell
+python .\record_gif.py --episodes 8 --top-k 1 --select-metric lines --loop 0
+```
+
 If your checkpoint was trained without hold actions:
 ```powershell
 python .\record_gif.py --model-path .\models\<checkpoint>.zip --no-hold-actions

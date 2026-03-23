@@ -161,6 +161,25 @@ def main() -> None:
     parser.add_argument("--episode-pause", type=float, default=0.5)
     parser.add_argument("--out", type=str, default="assets/tetris_bot.gif")
     parser.add_argument(
+        "--loop",
+        type=int,
+        default=0,
+        help="GIF loop count. 0 = infinite loop, 1 = play once.",
+    )
+    parser.add_argument(
+        "--select-metric",
+        type=str,
+        default="lines",
+        choices=["lines", "return"],
+        help="Metric used to pick the best episodes for the GIF.",
+    )
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=1,
+        help="Number of best episodes to include in the GIF.",
+    )
+    parser.add_argument(
         "--hold-actions",
         dest="hold_actions",
         action="store_true",
@@ -201,6 +220,7 @@ def main() -> None:
     model = DQN.load(str(model_path), env=env)
 
     frames: list[np.ndarray] = []
+    episodes_data: list[tuple[dict[str, float], list[np.ndarray]]] = []
     frame_skip = max(int(args.frame_skip), 1)
     max_steps = int(args.max_steps)
     pause_frames = max(int(round(float(args.episode_pause) * float(args.fps))), 0)
@@ -208,12 +228,15 @@ def main() -> None:
     try:
         for ep in range(1, int(args.episodes) + 1):
             obs, info = env.reset(seed=args.seed + ep)
-
+            ep_frames: list[np.ndarray] = []
             frame = _extract_frame(env.render())
             if frame is not None:
+                ep_frames.append(frame)
                 frames.append(frame)
 
             steps = 0
+            episode_return = 0.0
+            episode_lines = 0
             while True:
                 action, _ = model.predict(obs, deterministic=True)
                 if isinstance(action, np.ndarray):
@@ -221,25 +244,44 @@ def main() -> None:
 
                 obs, reward, terminated, truncated, info = env.step(int(action))
                 steps += 1
+                episode_return += float(reward)
+                episode_lines += int(info.get("lines_cleared", 0) or 0)
 
                 if steps % frame_skip == 0:
                     frame = _extract_frame(env.render())
                     if frame is not None:
-                        frames.append(frame)
+                        ep_frames.append(frame)
 
                 if terminated or truncated or (max_steps > 0 and steps >= max_steps):
-                    if pause_frames > 0 and frames:
-                        frames.extend([frames[-1]] * pause_frames)
+                    if pause_frames > 0 and ep_frames:
+                        ep_frames.extend([ep_frames[-1]] * pause_frames)
+                    episodes_data.append(
+                        (
+                            {"lines": float(episode_lines), "return": float(episode_return)},
+                            ep_frames,
+                        )
+                    )
                     break
     finally:
         env.close()
+    if not episodes_data:
+        raise RuntimeError("No episodes captured. Check render support for this environment.")
+
+    metric = str(args.select_metric)
+    top_k = max(int(args.top_k), 1)
+    episodes_sorted = sorted(
+        episodes_data, key=lambda item: float(item[0].get(metric, 0.0)), reverse=True
+    )
+    chosen = episodes_sorted[: min(top_k, len(episodes_sorted))]
+    for stats, ep_frames in chosen:
+        frames.extend(ep_frames)
 
     if not frames:
         raise RuntimeError("No frames captured. Check render support for this environment.")
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    imageio.mimsave(out_path, frames, fps=int(args.fps))
+    imageio.mimsave(out_path, frames, fps=int(args.fps), loop=int(args.loop))
     print(f"Wrote GIF: {out_path} ({len(frames)} frames)")
 
 
