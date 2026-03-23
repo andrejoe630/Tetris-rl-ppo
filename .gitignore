@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SB3 artifacts
+*.zip
+*.pkl
+
+# Logs
+runs/
+logs/
