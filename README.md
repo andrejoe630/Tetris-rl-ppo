@@ -39,16 +39,6 @@ python .\dqn\train_dqn_server.py --timesteps 500000 --obs board --hold-actions -
 python .\dqn\train_dqn_server.py --timesteps 2000000 --resume-from .\models\<checkpoint>.zip
 ```
 
-## Train on server (headless)
-```powershell
-ssh root@65.109.128.235 "cd /root/tetris-rl-dqn; OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 nohup python train_dqn_server.py --timesteps 2000000 --obs board --hold-actions --next-n 5 --reward-profile tetris > dqn_train.log 2>&1 &"
-```
-
-Monitor:
-```powershell
-ssh root@65.109.128.235 "tail -40 /root/tetris-rl-dqn/dqn_train.log"
-```
-
 ## Watch the agent play locally
 Pull the latest checkpoint from the server and render:
 ```powershell
