@@ -94,7 +94,7 @@ tensorboard --logdir /root/tetris-rl-dqn/logs --port 6006 --host 127.0.0.1
 ```
 Then open: http://localhost:16006
 
-## Best models (as of Feb 2025)
+## Best models (as of Jan 2026)
 
 - `dqn_tetris_board_hold_32900000` — 75.3 lines/ep (obs=board, hold, next-n=1, tetris reward)
 - `dqn_tetris_board_hold_32850000` — 65.0 lines/ep (obs=board, hold, next-n=1, tetris reward)
